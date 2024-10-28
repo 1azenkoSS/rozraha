@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DESX Шифрування та Розшифрування</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>DESX Шифрування та Розшифрування</h1>
+
+        <h2>Шифрування</h2>
+        <input type="text" id="plaintext" placeholder="Введіть текст для шифрування">
+        <input type="text" id="key" placeholder="Введіть ключ (8 символів)">
+        <button onclick="encrypt()">Шифрувати</button>
+        <h3>Зашифрований текст:</h3>
+        <p id="ciphertext"></p>
+
+        <h2>Розшифрування</h2>
+        <input type="text" id="ciphertextInput" placeholder="Введіть зашифрований текст">
+        <input type="text" id="keyDecrypt" placeholder="Введіть ключ (8 символів)">
+        <button onclick="decrypt()">Розшифрувати</button>
+        <h3>Розшифрований текст:</h3>
+        <p id="decryptedText"></p>
+    </div>
+
+    <script>
+        async function encrypt() {
+            const plaintext = document.getElementById('plaintext').value;
+            const key = document.getElementById('key').value;
+
+            try {
+                const response = await fetch('http://localhost:5000/encrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ plaintext, key })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById('ciphertext').innerText = "Помилка: " + errorData.error;
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('ciphertext').innerText = data.ciphertext || "Помилка при шифруванні.";
+            } catch (error) {
+                document.getElementById('ciphertext').innerText = "Помилка: " + error.message;
+            }
+        }
+
+        async function decrypt() {
+            const ciphertext = document.getElementById('ciphertextInput').value;
+            const key = document.getElementById('keyDecrypt').value;
+
+            try {
+                const response = await fetch('http://localhost:5000/decrypt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ciphertext, key })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    document.getElementById('decryptedText').innerText = "Помилка: " + errorData.error;
+                    return;
+                }
+
+                const data = await response.json();
+                document.getElementById('decryptedText').innerText = data.plaintext || "Помилка при розшифруванні.";
+            } catch (error) {
+                document.getElementById('decryptedText').innerText = "Помилка: " + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
